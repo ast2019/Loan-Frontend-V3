@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Switch, Route, Redirect, useHistory } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import TermsPage from './pages/TermsPage';
 import LoginMobilePage from './pages/LoginMobilePage';
@@ -18,28 +18,28 @@ import RequestsListPage from './admin/pages/RequestsListPage';
 import RequestDetailPage from './admin/pages/RequestDetailPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const isAuthenticated = authApi.isAuthenticated();
 
   React.useEffect(() => {
     if (!isAuthenticated) {
-      history.replace('/auth/login');
+      navigate('/auth/login', { replace: true });
     }
-  }, [isAuthenticated, history]);
+  }, [isAuthenticated, navigate]);
 
   if (!isAuthenticated) return null;
   return <>{children}</>;
 };
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const isAuthenticated = adminApi.isAuthenticated();
 
   React.useEffect(() => {
     if (!isAuthenticated) {
-      history.replace('/admin/login');
+      navigate('/admin/login', { replace: true });
     }
-  }, [isAuthenticated, history]);
+  }, [isAuthenticated, navigate]);
 
   if (!isAuthenticated) return null;
   return <>{children}</>;
@@ -48,51 +48,46 @@ const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <Switch>
+      <Routes>
         {/* Admin Login */}
-        <Route path="/admin/login" component={AdminLoginPage} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
         {/* Admin Section */}
-        <Route path="/admin">
-          <ProtectedAdminRoute>
-            <AdminLayout>
-              <Switch>
-                <Route path="/admin/dashboard" component={AdminDashboardPage} />
-                <Route path="/admin/requests/:id" component={RequestDetailPage} />
-                <Route path="/admin/requests" component={RequestsListPage} />
-                <Redirect from="/admin" to="/admin/dashboard" />
-              </Switch>
-            </AdminLayout>
-          </ProtectedAdminRoute>
+        <Route path="/admin" element={
+            <ProtectedAdminRoute>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+        }>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="requests" element={<RequestsListPage />} />
+            <Route path="requests/:id" element={<RequestDetailPage />} />
         </Route>
 
         {/* Authenticated User App */}
-        <Route path="/app">
-           <ProtectedRoute>
-             <Layout isAuthenticated={true}>
-               <Switch>
-                 <Route path="/app/terms" component={TermsPage} />
-                 <Route path="/app/new-request" component={NewLoanRequestPage} />
-                 <Route path="/app/request" component={LoanRequestDetailPage} />
-                 <Route path="/app" component={DashboardPage} />
-               </Switch>
-             </Layout>
-           </ProtectedRoute>
+        <Route path="/app" element={
+            <ProtectedRoute>
+              <Layout isAuthenticated={true} />
+            </ProtectedRoute>
+        }>
+            <Route index element={<DashboardPage />} />
+            <Route path="terms" element={<TermsPage />} />
+            <Route path="new-request" element={<NewLoanRequestPage />} />
+            <Route path="request" element={<LoanRequestDetailPage />} />
         </Route>
 
         {/* Public Routes */}
-        <Route path="/">
-           <Layout isAuthenticated={false}>
-             <Switch>
-               <Route path="/auth/login" component={LoginMobilePage} />
-               <Route path="/auth/otp" component={LoginOtpPage} />
-               <Redirect exact from="/" to="/auth/login" />
-               <Redirect to="/auth/login" />
-             </Switch>
-           </Layout>
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        
+        <Route element={<Layout isAuthenticated={false} />}>
+            <Route path="/auth/login" element={<LoginMobilePage />} />
+            <Route path="/auth/otp" element={<LoginOtpPage />} />
         </Route>
 
-      </Switch>
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/auth/login" replace />} />
+
+      </Routes>
     </HashRouter>
   );
 };

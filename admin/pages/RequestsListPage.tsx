@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../services/adminApi';
 import { LoanStatus } from '../../types';
 import { Loader2, Search, Filter, Eye } from 'lucide-react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
 
 const RequestsListPage: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   
@@ -27,7 +27,7 @@ const RequestsListPage: React.FC = () => {
     } else {
         params.delete('status');
     }
-    history.push({ search: params.toString() });
+    navigate({ search: params.toString() });
   };
 
   return (

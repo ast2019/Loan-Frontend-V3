@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../services/adminApi';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
@@ -8,7 +8,7 @@ const AdminLoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +17,7 @@ const AdminLoginPage: React.FC = () => {
     
     try {
       await adminApi.login(username, password);
-      history.push('/admin/dashboard');
+      navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.message);
     } finally {

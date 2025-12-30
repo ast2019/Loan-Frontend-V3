@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
 import { authApi } from '../services/apiClient';
 import { useMutation } from '@tanstack/react-query';
@@ -8,12 +8,12 @@ import { Loader2 } from 'lucide-react';
 const LoginMobilePage: React.FC = () => {
   const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: authApi.requestOtp,
     onSuccess: () => {
-      history.push('/auth/otp', { mobile });
+      navigate('/auth/otp', { state: { mobile } });
     },
     onError: () => {
       setError("خطایی در ارسال کد رخ داد. لطفاً مجدد تلاش کنید.");

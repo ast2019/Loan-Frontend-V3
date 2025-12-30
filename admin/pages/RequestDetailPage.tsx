@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../services/adminApi';
 import { LoanStatus } from '../../types';
@@ -9,7 +9,7 @@ import { Loader2, ArrowRight, Download, Printer, Ban, CheckCircle, Save } from '
 
 const RequestDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const history = useHistory();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   
   const [showIssueModal, setShowIssueModal] = useState(false);
@@ -67,7 +67,7 @@ const RequestDetailPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-20">
       <div className="flex items-center gap-4">
-        <button onClick={() => history.push('/admin/requests')} className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
+        <button onClick={() => navigate('/admin/requests')} className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
            <ArrowRight size={20} />
         </button>
         <div>

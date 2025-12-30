@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { loanApi, authApi } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, UploadCloud } from 'lucide-react';
 import { CreateLoanParams } from '../types';
 
@@ -13,7 +13,7 @@ const QUICK_AMOUNTS = [10_000_000, 20_000_000, 50_000_000, 100_000_000];
 const TENORS = [12, 18, 24];
 
 const NewLoanRequestPage: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = authApi.getCurrentUser();
   
@@ -22,12 +22,12 @@ const NewLoanRequestPage: React.FC = () => {
     try {
       const accepted = localStorage.getItem('touran:termsAccepted') === 'true';
       if (!accepted) {
-        history.replace('/app/terms');
+        navigate('/app/terms', { replace: true });
       }
     } catch (e) {
-      history.replace('/app/terms');
+      navigate('/app/terms', { replace: true });
     }
-  }, [history]);
+  }, [navigate]);
 
   // Form States
   const [nationalId, setNationalId] = useState('');
@@ -48,7 +48,7 @@ const NewLoanRequestPage: React.FC = () => {
     mutationFn: loanApi.createLoan,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeLoan'] });
-      history.push('/app/request');
+      navigate('/app/request');
     },
     onError: (err: any) => {
       setErrors({ form: err.message || 'خطایی رخ داد' });

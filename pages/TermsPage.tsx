@@ -1,9 +1,9 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
 
 const TermsPage: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleAccept = () => {
     try {
@@ -13,7 +13,7 @@ const TermsPage: React.FC = () => {
       console.warn("Could not save terms acceptance", e);
     }
     
-    history.push('/app');
+    navigate('/app');
   };
 
   return (

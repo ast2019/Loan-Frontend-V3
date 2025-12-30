@@ -1,18 +1,14 @@
 import React from 'react';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Users, FileText, Settings, LogOut, Shield } from 'lucide-react';
 import { adminApi } from '../../services/adminApi';
 
-interface LayoutProps {
-  children?: React.ReactNode;
-}
-
-const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
-  const history = useHistory();
+const AdminLayout: React.FC = () => {
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     adminApi.logout();
-    history.push('/admin/login');
+    navigate('/admin/login');
   };
 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>
@@ -75,7 +71,7 @@ const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

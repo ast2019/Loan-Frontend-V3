@@ -1,6 +1,6 @@
 import React from 'react';
-import { useHistory, useLocation, Link } from 'react-router-dom';
-import { LogOut, Home, FileText } from 'lucide-react';
+import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { authApi } from '../services/apiClient';
 
 interface LayoutProps {
@@ -9,7 +9,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ isAuthenticated, children }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   
   const isUserAuthenticated = authApi.isAuthenticated();
@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ isAuthenticated, children }) => {
 
   const handleLogout = () => {
     authApi.logout();
-    history.push('/auth/login');
+    navigate('/auth/login');
   };
 
   return (
@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ isAuthenticated, children }) => {
       </header>
 
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:py-8">
-        {children}
+        {children || <Outlet />}
       </main>
 
       <footer className="bg-white border-t border-slate-200 py-6 mt-8">

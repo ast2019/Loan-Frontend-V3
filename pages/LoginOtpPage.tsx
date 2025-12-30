@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
 import { authApi } from '../services/apiClient';
 import { useMutation } from '@tanstack/react-query';
@@ -11,13 +11,13 @@ const LoginOtpPage: React.FC = () => {
   const [error, setError] = useState('');
   const [resendSuccess, setResendSuccess] = useState('');
   
-  const history = useHistory();
-  const location = useLocation<{ mobile?: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const mobile = location.state?.mobile;
 
   useEffect(() => {
-    if (!mobile) history.replace('/auth/login');
-  }, [mobile, history]);
+    if (!mobile) navigate('/auth/login', { replace: true });
+  }, [mobile, navigate]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -27,10 +27,10 @@ const LoginOtpPage: React.FC = () => {
   }, [timer]);
 
   const loginMutation = useMutation({
-    mutationFn: (otpCode: string) => authApi.verifyOtp(mobile!, otpCode),
+    mutationFn: (otpCode: string) => authApi.verifyOtp(mobile, otpCode),
     onSuccess: () => {
       // Step 1 Complete -> Go to Step 2 (Terms)
-      history.replace('/app/terms');
+      navigate('/app/terms', { replace: true });
     },
     onError: (err: any) => {
       setError(err.message || "کد وارد شده صحیح نمی‌باشد.");
@@ -38,7 +38,7 @@ const LoginOtpPage: React.FC = () => {
   });
 
   const resendMutation = useMutation({
-    mutationFn: () => authApi.requestOtp(mobile!),
+    mutationFn: () => authApi.requestOtp(mobile),
     onSuccess: () => {
       setTimer(60);
       setResendSuccess('کد تایید مجدد ارسال شد.');
@@ -71,7 +71,7 @@ const LoginOtpPage: React.FC = () => {
         <h2 className="text-xl font-bold text-slate-800 mb-2">تایید شماره موبایل</h2>
         <div className="flex items-center justify-between text-slate-500 mb-6 text-sm bg-slate-50 p-3 rounded-lg">
            <span>کد ارسال شده به {mobile}</span>
-           <button onClick={() => history.push('/auth/login')} className="text-primary flex items-center gap-1 hover:underline">
+           <button onClick={() => navigate('/auth/login')} className="text-primary flex items-center gap-1 hover:underline">
              <Edit2 size={14} /> اصلاح
            </button>
         </div>
