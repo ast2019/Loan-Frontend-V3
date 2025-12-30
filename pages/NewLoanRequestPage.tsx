@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { loanApi, authApi } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Loader2, Search, UploadCloud } from 'lucide-react';
 import { CreateLoanParams } from '../types';
 
-const AMOUNTS = [30000000, 50000000, 100000000];
+const MIN_AMOUNT = 5_000_000;
+const MAX_AMOUNT = 200_000_000;
+const STEP_AMOUNT = 1_000_000;
+const QUICK_AMOUNTS = [10_000_000, 20_000_000, 50_000_000, 100_000_000];
 const TENORS = [12, 18, 24];
 
 const NewLoanRequestPage: React.FC = () => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const queryClient = useQueryClient();
   const user = authApi.getCurrentUser();
   
@@ -19,16 +22,16 @@ const NewLoanRequestPage: React.FC = () => {
     try {
       const accepted = localStorage.getItem('touran:termsAccepted') === 'true';
       if (!accepted) {
-        navigate('/app/terms', { replace: true });
+        history.replace('/app/terms');
       }
     } catch (e) {
-      navigate('/app/terms', { replace: true });
+      history.replace('/app/terms');
     }
-  }, [navigate]);
+  }, [history]);
 
   // Form States
   const [nationalId, setNationalId] = useState('');
-  const [amount, setAmount] = useState<number>(50000000);
+  const [amount, setAmount] = useState<number>(50_000_000);
   const [tenor, setTenor] = useState<number>(12);
   const [branchSearch, setBranchSearch] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
@@ -45,7 +48,7 @@ const NewLoanRequestPage: React.FC = () => {
     mutationFn: loanApi.createLoan,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeLoan'] });
-      navigate('/app/request');
+      history.push('/app/request');
     },
     onError: (err: any) => {
       setErrors({ form: err.message || 'خطایی رخ داد' });
@@ -56,10 +59,20 @@ const NewLoanRequestPage: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (nationalId.length !== 10 || !/^\d+$/.test(nationalId)) newErrors.nationalId = "کد ملی باید ۱۰ رقم باشد";
-    if (!selectedBranch) newErrors.branch = "لطفاً یک شعبه انتخاب کنید";
-    if (!acceptedTerms) newErrors.terms = "تایید قوانین الزامی است";
-    if (!acceptedCheque) newErrors.cheque = "تایید شرط چک برگشتی الزامی است";
+    
+    // Validate National ID
+    if (!nationalId) {
+        newErrors.nationalId = "لطفاً کد ملی را وارد کنید.";
+    } else if (!/^\d{10}$/.test(nationalId)) {
+        newErrors.nationalId = "کد ملی باید دقیقاً ۱۰ رقم عددی باشد.";
+    }
+
+    // Validate Branch
+    if (!selectedBranch) newErrors.branch = "لطفاً یک شعبه را از لیست انتخاب کنید.";
+
+    // Validate Checkboxes
+    if (!acceptedTerms) newErrors.terms = "برای ثبت درخواست، تایید صحت اطلاعات الزامی است.";
+    if (!acceptedCheque) newErrors.cheque = "تایید شرط عدم چک برگشتی الزامی است.";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -79,6 +92,25 @@ const NewLoanRequestPage: React.FC = () => {
     };
 
     mutation.mutate(params);
+  };
+
+  // Logic to handle Amount Input (Manual Entry)
+  const handleAmountInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawVal = e.target.value.replace(/,/g, '');
+    if (!rawVal) {
+        setAmount(MIN_AMOUNT);
+        return;
+    }
+    if (/^\d+$/.test(rawVal)) {
+        let val = parseInt(rawVal, 10);
+        if (val > MAX_AMOUNT) val = MAX_AMOUNT;
+        setAmount(val);
+    }
+  };
+
+  const handleAmountInputBlur = () => {
+      if (amount < MIN_AMOUNT) setAmount(MIN_AMOUNT);
+      if (amount > MAX_AMOUNT) setAmount(MAX_AMOUNT);
   };
 
   return (
@@ -116,22 +148,60 @@ const NewLoanRequestPage: React.FC = () => {
               {errors.nationalId && <p className="text-red-500 text-xs mt-1">{errors.nationalId}</p>}
             </div>
 
-            {/* Amount */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">مبلغ وام (تومان) <span className="text-red-500">*</span></label>
-              <select 
-                value={amount} 
-                onChange={(e) => setAmount(Number(e.target.value))}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 bg-white"
-              >
-                {AMOUNTS.map(a => (
-                  <option key={a} value={a}>{a.toLocaleString()} تومان</option>
-                ))}
-              </select>
+            {/* Amount Slider & Input Combined */}
+            <div className="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <label className="block text-sm font-medium text-slate-700 mb-4">مبلغ وام درخواستی <span className="text-red-500">*</span></label>
+              
+              <div className="flex flex-col gap-6">
+                 {/* Top Row: Slider value display / Input */}
+                 <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                        <input 
+                          type="text" 
+                          className="w-full pl-16 pr-4 py-3 text-lg font-bold text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-left dir-ltr"
+                          value={amount.toLocaleString()}
+                          onChange={handleAmountInputChange}
+                          onBlur={handleAmountInputBlur}
+                        />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">تومان</span>
+                    </div>
+                 </div>
+
+                 {/* Middle Row: Slider */}
+                 <div className="px-2">
+                    <input 
+                        type="range" 
+                        min={MIN_AMOUNT} 
+                        max={MAX_AMOUNT} 
+                        step={STEP_AMOUNT}
+                        value={amount}
+                        onChange={(e) => setAmount(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                    <div className="flex justify-between text-xs text-slate-400 mt-2 font-mono">
+                        <span>{MIN_AMOUNT.toLocaleString()}</span>
+                        <span>{MAX_AMOUNT.toLocaleString()}</span>
+                    </div>
+                 </div>
+
+                 {/* Bottom Row: Quick Chips */}
+                 <div className="flex flex-wrap gap-2">
+                    {QUICK_AMOUNTS.map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setAmount(val)}
+                          className={`px-3 py-1.5 text-xs rounded-full border transition-all ${amount === val ? 'bg-primary text-white border-primary' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+                        >
+                           {(val / 1000000).toLocaleString()} میلیون تومان
+                        </button>
+                    ))}
+                 </div>
+              </div>
             </div>
 
             {/* Tenor */}
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-2">مدت بازپرداخت <span className="text-red-500">*</span></label>
               <div className="grid grid-cols-3 gap-3">
                 {TENORS.map(t => (

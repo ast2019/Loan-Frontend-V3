@@ -1,14 +1,18 @@
 import React from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 import { LayoutDashboard, Users, FileText, Settings, LogOut, Shield } from 'lucide-react';
 import { adminApi } from '../../services/adminApi';
 
-const AdminLayout: React.FC = () => {
-  const navigate = useNavigate();
+interface LayoutProps {
+  children?: React.ReactNode;
+}
+
+const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
+  const history = useHistory();
 
   const handleLogout = () => {
     adminApi.logout();
-    navigate('/admin/login');
+    history.push('/admin/login');
   };
 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>
@@ -20,7 +24,6 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex font-sans">
-      {/* Sidebar */}
       <aside className="w-64 bg-white border-l border-slate-200 hidden md:flex flex-col fixed h-full z-10">
         <div className="h-16 flex items-center px-6 border-b border-slate-100 gap-2">
           <div className="w-8 h-8 bg-slate-800 text-white rounded-lg flex items-center justify-center font-bold">A</div>
@@ -57,9 +60,7 @@ const AdminLayout: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 md:mr-64 flex flex-col min-w-0">
-        {/* Header Mobile/Desktop */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
           <div className="md:hidden font-bold text-slate-800">پنل مدیریت</div>
           <div className="flex items-center gap-4 mr-auto">
@@ -74,7 +75,7 @@ const AdminLayout: React.FC = () => {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { loanApi } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { Loader2, PlusCircle, FileText, AlertCircle, ArrowLeft, BookOpen } from 'lucide-react';
 import { LoanStatus } from '../types';
 
 const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Check terms acceptance on mount

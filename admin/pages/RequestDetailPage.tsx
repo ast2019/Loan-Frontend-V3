@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../services/adminApi';
 import { LoanStatus } from '../../types';
@@ -9,15 +9,13 @@ import { Loader2, ArrowRight, Download, Printer, Ban, CheckCircle, Save } from '
 
 const RequestDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const history = useHistory();
   const queryClient = useQueryClient();
   
-  // Modals state
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
   const [showCloseModal, setShowCloseModal] = useState(false);
 
-  // Bank Form State
   const [bankApproved, setBankApproved] = useState(true);
   const [finalAmount, setFinalAmount] = useState<string>('');
   
@@ -41,14 +39,11 @@ const RequestDetailPage: React.FC = () => {
   if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary" /></div>;
   if (!req) return <div className="text-center py-20">درخواست یافت نشد</div>;
 
-  // Map status to step number
   const getStep = (s: string) => {
-    // New Step Logic 1..6
-    // If we are admin, we likely want to see where the user is at.
     if (s === LoanStatus.IdentityCheck) return 3;
     if (s === LoanStatus.RejectedByShahkar) return 3;
     if (s === LoanStatus.WaitingForLetter) return 4;
-    if (s === LoanStatus.LetterIssued) return 4; // Admin view
+    if (s === LoanStatus.LetterIssued) return 4; 
     if (s === LoanStatus.WaitingForBankApproval) return 5;
     if (s === LoanStatus.LoanPaid) return 6;
     return 3;
@@ -71,9 +66,8 @@ const RequestDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/admin/requests')} className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
+        <button onClick={() => history.push('/admin/requests')} className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
            <ArrowRight size={20} />
         </button>
         <div>
@@ -90,7 +84,6 @@ const RequestDetailPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Info Card */}
         <div className="lg:col-span-2 space-y-6">
            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-700">اطلاعات پرونده</div>
@@ -123,7 +116,6 @@ const RequestDetailPage: React.FC = () => {
              </div>
            </div>
 
-           {/* Bank Result Section (If Paid) */}
            {req.bankResult && (
              <div className="bg-emerald-50 rounded-xl border border-emerald-200 p-6">
                 <h3 className="font-bold text-emerald-800 mb-4 flex items-center gap-2">
@@ -144,9 +136,7 @@ const RequestDetailPage: React.FC = () => {
            )}
         </div>
 
-        {/* Actions Sidebar */}
         <div className="space-y-4">
-           {/* Action Box */}
            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
               <h3 className="font-bold text-slate-800 mb-4">عملیات مجاز</h3>
               <div className="space-y-3">
@@ -190,9 +180,6 @@ const RequestDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- Modals --- */}
-      
-      {/* Issue Letter Modal */}
       {showIssueModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
            <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden">
@@ -219,7 +206,6 @@ const RequestDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Bank Result Modal */}
       {showBankModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
            <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden">
@@ -269,7 +255,6 @@ const RequestDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Close Request Modal */}
       {showCloseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
            <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden">

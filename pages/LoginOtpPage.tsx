@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
 import { authApi } from '../services/apiClient';
 import { useMutation } from '@tanstack/react-query';
-import { Loader2, Edit2 } from 'lucide-react';
+import { Loader2, Edit2, CheckCircle2 } from 'lucide-react';
 
 const LoginOtpPage: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(60);
   const [error, setError] = useState('');
+  const [resendSuccess, setResendSuccess] = useState('');
   
-  const navigate = useNavigate();
-  const location = useLocation();
+  const history = useHistory();
+  const location = useLocation<{ mobile?: string }>();
   const mobile = location.state?.mobile;
 
   useEffect(() => {
-    if (!mobile) navigate('/auth/login');
-  }, [mobile, navigate]);
+    if (!mobile) history.replace('/auth/login');
+  }, [mobile, history]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -26,13 +27,26 @@ const LoginOtpPage: React.FC = () => {
   }, [timer]);
 
   const loginMutation = useMutation({
-    mutationFn: (otpCode: string) => authApi.verifyOtp(mobile, otpCode),
+    mutationFn: (otpCode: string) => authApi.verifyOtp(mobile!, otpCode),
     onSuccess: () => {
       // Step 1 Complete -> Go to Step 2 (Terms)
-      navigate('/app/terms', { replace: true });
+      history.replace('/app/terms');
     },
     onError: (err: any) => {
       setError(err.message || "کد وارد شده صحیح نمی‌باشد.");
+    }
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: () => authApi.requestOtp(mobile!),
+    onSuccess: () => {
+      setTimer(60);
+      setResendSuccess('کد تایید مجدد ارسال شد.');
+      setError('');
+      setTimeout(() => setResendSuccess(''), 3000);
+    },
+    onError: () => {
+      setError('خطا در ارسال مجدد کد. لطفاً لحظاتی دیگر تلاش کنید.');
     }
   });
 
@@ -43,6 +57,12 @@ const LoginOtpPage: React.FC = () => {
     loginMutation.mutate(otp);
   };
 
+  const handleResend = () => {
+    if (timer === 0) {
+      resendMutation.mutate();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Stepper6 currentStep={1} />
@@ -51,7 +71,7 @@ const LoginOtpPage: React.FC = () => {
         <h2 className="text-xl font-bold text-slate-800 mb-2">تایید شماره موبایل</h2>
         <div className="flex items-center justify-between text-slate-500 mb-6 text-sm bg-slate-50 p-3 rounded-lg">
            <span>کد ارسال شده به {mobile}</span>
-           <button onClick={() => navigate('/auth/login')} className="text-primary flex items-center gap-1 hover:underline">
+           <button onClick={() => history.push('/auth/login')} className="text-primary flex items-center gap-1 hover:underline">
              <Edit2 size={14} /> اصلاح
            </button>
         </div>
@@ -70,14 +90,24 @@ const LoginOtpPage: React.FC = () => {
               autoFocus
             />
             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+            {resendSuccess && (
+              <p className="text-green-600 text-xs mt-2 flex items-center gap-1">
+                <CheckCircle2 size={12} /> {resendSuccess}
+              </p>
+            )}
           </div>
 
           <div className="text-center text-sm">
              {timer > 0 ? (
                  <span className="text-slate-400">ارسال مجدد کد تا {timer} ثانیه دیگر</span>
              ) : (
-                 <button type="button" onClick={() => { setTimer(60); /* logic to resend api */ }} className="text-primary font-bold hover:underline">
-                     ارسال مجدد کد
+                 <button 
+                   type="button" 
+                   onClick={handleResend} 
+                   disabled={resendMutation.isPending}
+                   className="text-primary font-bold hover:underline disabled:opacity-50"
+                 >
+                   {resendMutation.isPending ? 'در حال ارسال...' : 'ارسال مجدد کد'}
                  </button>
              )}
           </div>

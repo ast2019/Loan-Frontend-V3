@@ -1,12 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
 
 const TermsPage: React.FC = () => {
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const handleAccept = () => {
-    // Save acceptance to localStorage to gate Step 3
     try {
       localStorage.setItem('touran:termsAccepted', 'true');
       localStorage.setItem('touran:termsAcceptedAt', new Date().toISOString());
@@ -14,8 +13,7 @@ const TermsPage: React.FC = () => {
       console.warn("Could not save terms acceptance", e);
     }
     
-    // Proceed to Dashboard/Next Step
-    navigate('/app');
+    history.push('/app');
   };
 
   return (

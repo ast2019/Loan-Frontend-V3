@@ -3,11 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../services/adminApi';
 import { LoanStatus } from '../../types';
 import { Loader2, Search, Filter, Eye } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
 
 const RequestsListPage: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const history = useHistory();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  
   const [searchTerm, setSearchTerm] = useState('');
   
   const statusFilter = searchParams.get('status') || '';
@@ -18,8 +21,13 @@ const RequestsListPage: React.FC = () => {
   });
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (e.target.value) setSearchParams({ status: e.target.value });
-    else setSearchParams({});
+    const params = new URLSearchParams(location.search);
+    if (e.target.value) {
+        params.set('status', e.target.value);
+    } else {
+        params.delete('status');
+    }
+    history.push({ search: params.toString() });
   };
 
   return (
@@ -31,7 +39,6 @@ const RequestsListPage: React.FC = () => {
         </div>
         
         <div className="flex gap-3">
-          {/* Search */}
           <div className="relative">
              <Search className="absolute right-3 top-3 text-slate-400" size={18} />
              <input 
@@ -43,7 +50,6 @@ const RequestsListPage: React.FC = () => {
              />
           </div>
 
-          {/* Filter */}
           <div className="relative">
             <Filter className="absolute right-3 top-3 text-slate-400" size={18} />
             <select 
