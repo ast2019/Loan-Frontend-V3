@@ -10,7 +10,7 @@ const MIN_AMOUNT = 5_000_000;
 const MAX_AMOUNT = 200_000_000;
 const STEP_AMOUNT = 1_000_000;
 const QUICK_AMOUNTS = [10_000_000, 20_000_000, 50_000_000, 100_000_000];
-const TENORS = [12, 18, 24];
+const TENORS = [6, 12, 18, 24];
 
 const NewLoanRequestPage: React.FC = () => {
   const navigate = useNavigate();
@@ -203,7 +203,7 @@ const NewLoanRequestPage: React.FC = () => {
             {/* Tenor */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-2">مدت بازپرداخت <span className="text-red-500">*</span></label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {TENORS.map(t => (
                   <button
                     key={t}

@@ -43,13 +43,13 @@ const Stepper6: React.FC<StepperProps> = ({ currentStep }) => {
             <div key={index} className="flex flex-col items-center gap-2 relative bg-f5f5f5 px-2">
               <div 
                 className={`
-                  w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 z-10 bg-white
+                  w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 z-10 bg-white font-bold
                   ${isCompleted ? 'border-primary bg-primary text-white' : ''}
                   ${isCurrent ? 'border-primary text-primary shadow-md scale-110' : ''}
                   ${!isCompleted && !isCurrent ? 'border-slate-300 text-slate-300' : ''}
                 `}
               >
-                {isCompleted ? <Check size={20} /> : <span>{stepNum}</span>}
+                <span>{stepNum}</span>
               </div>
               <span className={`text-xs font-medium whitespace-nowrap ${isCurrent ? 'text-primary font-bold' : 'text-slate-500'}`}>
                 {label}
