@@ -1,31 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { loanApi } from '../services/apiClient';
+import { loanApi, safeStorage } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
 import { LoanStatus } from '../types';
 import { Loader2, Download, RefreshCw, CheckCircle2, XCircle, Clock, ShieldCheck } from 'lucide-react';
-
-// Safe local helper for component-specific storage
-const getStoredFlag = (key: string): boolean => {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      return window.localStorage.getItem(key) === 'true';
-    }
-  } catch (e) {
-    // Ignore error
-  }
-  return false;
-};
-
-const setStoredFlag = (key: string, value: string) => {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(key, value);
-    }
-  } catch (e) {
-    // Ignore error
-  }
-};
 
 const LoanRequestDetailPage: React.FC = () => {
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -48,7 +26,7 @@ const LoanRequestDetailPage: React.FC = () => {
   // Check LocalStorage for download flag on mount/update
   useEffect(() => {
     if (loan) {
-      if (getStoredFlag(`loan:${loan.id}:letterDownloaded`)) {
+      if (safeStorage.getItem(`loan:${loan.id}:letterDownloaded`) === 'true') {
         setIsLetterDownloaded(true);
       }
     }
@@ -70,7 +48,7 @@ const LoanRequestDetailPage: React.FC = () => {
       link.remove();
       
       // Set flag
-      setStoredFlag(`loan:${loan.id}:letterDownloaded`, 'true');
+      safeStorage.setItem(`loan:${loan.id}:letterDownloaded`, 'true');
       setIsLetterDownloaded(true);
     } catch (e) {
       alert("خطا در دانلود فایل");

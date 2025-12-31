@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { loanApi } from '../services/apiClient';
+import { loanApi, safeStorage } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, PlusCircle, FileText, AlertCircle, ArrowLeft, BookOpen } from 'lucide-react';
@@ -12,12 +12,8 @@ const DashboardPage: React.FC = () => {
 
   // Check terms acceptance on mount
   useEffect(() => {
-    try {
-      const accepted = localStorage.getItem('touran:termsAccepted') === 'true';
-      setTermsAccepted(accepted);
-    } catch(e) {
-      setTermsAccepted(false);
-    }
+    const accepted = safeStorage.getItem('touran:termsAccepted') === 'true';
+    setTermsAccepted(accepted);
   }, []);
 
   const { data: loan, isLoading, error, refetch } = useQuery({

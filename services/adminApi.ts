@@ -12,28 +12,24 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const safeStorage = {
   getItem: (key: string): string | null => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        return localStorage.getItem(key);
-      }
+      if (typeof window === 'undefined') return null;
+      return window.localStorage.getItem(key);
     } catch (e) {
       return null;
     }
-    return null;
   },
   setItem: (key: string, value: string): void => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(key, value);
-      }
+      if (typeof window === 'undefined') return;
+      window.localStorage.setItem(key, value);
     } catch (e) {
       // Ignore
     }
   },
   removeItem: (key: string): void => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.removeItem(key);
-      }
+      if (typeof window === 'undefined') return;
+      window.localStorage.removeItem(key);
     } catch (e) {
       // Ignore
     }

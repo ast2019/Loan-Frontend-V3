@@ -1,18 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stepper6 from '../components/Stepper6';
+import { safeStorage } from '../services/apiClient';
 
 const TermsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleAccept = () => {
-    try {
-      localStorage.setItem('touran:termsAccepted', 'true');
-      localStorage.setItem('touran:termsAcceptedAt', new Date().toISOString());
-    } catch (e) {
-      console.warn("Could not save terms acceptance", e);
-    }
-    
+    safeStorage.setItem('touran:termsAccepted', 'true');
+    safeStorage.setItem('touran:termsAcceptedAt', new Date().toISOString());
     navigate('/app');
   };
 

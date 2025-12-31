@@ -19,10 +19,11 @@ const KEY_LOAN = "turan_active_loan";
 const KEY_USER = "turan_user";
 
 // Safe Storage Wrapper
-const safeStorage = {
+export const safeStorage = {
   getItem: (key: string): string | null => {
     try {
-      return localStorage.getItem(key);
+      if (typeof window === 'undefined') return null;
+      return window.localStorage.getItem(key);
     } catch (e) {
       console.warn('LocalStorage access denied/failed', e);
       return null;
@@ -30,14 +31,16 @@ const safeStorage = {
   },
   setItem: (key: string, value: string): void => {
     try {
-      localStorage.setItem(key, value);
+      if (typeof window === 'undefined') return;
+      window.localStorage.setItem(key, value);
     } catch (e) {
       console.warn('LocalStorage access denied/failed', e);
     }
   },
   removeItem: (key: string): void => {
     try {
-      localStorage.removeItem(key);
+      if (typeof window === 'undefined') return;
+      window.localStorage.removeItem(key);
     } catch (e) {
       console.warn('LocalStorage access denied/failed', e);
     }

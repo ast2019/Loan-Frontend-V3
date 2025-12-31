@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { loanApi, authApi } from '../services/apiClient';
+import { loanApi, authApi, safeStorage } from '../services/apiClient';
 import Stepper6 from '../components/Stepper6';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, UploadCloud } from 'lucide-react';
@@ -19,12 +19,8 @@ const NewLoanRequestPage: React.FC = () => {
   
   // Guard: Check Terms Acceptance
   useEffect(() => {
-    try {
-      const accepted = localStorage.getItem('touran:termsAccepted') === 'true';
-      if (!accepted) {
-        navigate('/app/terms', { replace: true });
-      }
-    } catch (e) {
+    const accepted = safeStorage.getItem('touran:termsAccepted') === 'true';
+    if (!accepted) {
       navigate('/app/terms', { replace: true });
     }
   }, [navigate]);
